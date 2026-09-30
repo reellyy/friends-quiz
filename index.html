@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Friends Quiz · Pick Your Friend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Nunito:wght@600;800;900&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #655A92;
+    --purple-deep: #3f3766;
+    --lilac: #ece8f4;
+    --yellow: #ffd23f;
+    --red: #ff4b5c;
+    --blue: #3fa9ff;
+    --ink: #241d3d;
+
+    --rachel: #ff8fb8;
+    --ross:   #7fd66b;
+    --phoebe: #ffd23f;
+    --monica: #ff6b6b;
+    --joey:   #4fb4ff;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column; overflow: hidden;
+    font-family: 'Nunito', system-ui, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 15% 10%, #f1dde3 0, transparent 40%),
+      radial-gradient(circle at 85% 20%, #d8dcec 0, transparent 40%),
+      radial-gradient(circle at 50% 100%, #f6ecd0 0, transparent 45%),
+      linear-gradient(160deg, #efebf6, #cdc6e0);
+    background-attachment: fixed;
+  }
+  /* dotted y2k grid */
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(63,55,102,.18) 1.5px, transparent 1.6px);
+    background-size: 22px 22px;
+  }
+
+  /* floating sparkles */
+  .sparkle { position: fixed; pointer-events: none; color: #fff; text-shadow: 0 0 10px var(--purple), 0 0 2px var(--purple); animation: twinkle 3s ease-in-out infinite; }
+  @keyframes twinkle { 0%,100% { transform: scale(.7) rotate(0); opacity: .5 } 50% { transform: scale(1.2) rotate(20deg); opacity: 1 } }
+
+  /* marquee */
+  .marquee {
+    background: linear-gradient(#655A92, #3f3766); color: #fff;
+    font-family: 'VT323', monospace; font-size: 22px; letter-spacing: 1px;
+    border-bottom: 3px solid var(--yellow); overflow: hidden; white-space: nowrap; position: relative;
+  }
+  .marquee span { display: inline-block; padding: 4px 0; animation: scroll 28s linear infinite; }
+  @keyframes scroll { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+
+  main { flex: 1; min-height: 0; width: 100%; max-width: 1100px; margin: 0 auto; padding: clamp(8px, 2vh, 22px) 14px 16px; position: relative; display: flex; }
+
+  /* Y2K "window" */
+  .window {
+    background: rgba(255,255,255,.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 3px solid var(--purple-deep); border-radius: 22px;
+    box-shadow: 8px 8px 0 var(--purple-deep), 0 30px 60px rgba(63,55,102,.25);
+    overflow: hidden; display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0;
+  }
+  .titlebar {
+    display: flex; align-items: center; gap: 10px; padding: 9px 14px;
+    background: linear-gradient(#9086bd, #71669f 55%, #3f3766);
+    border-bottom: 3px solid var(--purple-deep); color: #fff;
+    font-family: 'VT323', monospace; font-size: 20px; letter-spacing: 1px;
+  }
+  .titlebar .dots { display: flex; gap: 6px; }
+  .titlebar .dots i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(0,0,0,.25); box-shadow: inset 0 3px 3px rgba(255,255,255,.6); }
+  .titlebar .dots i:nth-child(1) { background: var(--red) }
+  .titlebar .dots i:nth-child(2) { background: var(--yellow) }
+  .titlebar .dots i:nth-child(3) { background: var(--blue) }
+  .titlebar b { margin-left: auto; font-weight: 400; opacity: .85 }
+
+  /* hero */
+  .hero { text-align: center; padding: clamp(6px, 2vh, 28px) 16px 0; position: relative; }
+  .kicker {
+    display: inline-block; font-family: 'VT323', monospace; font-size: 22px;
+    background: var(--ink); color: var(--yellow); padding: 2px 14px; border-radius: 99px;
+    transform: rotate(-2deg); letter-spacing: 2px;
+  }
+  .logo { margin: clamp(4px, 1.6vh, 16px) 0 4px; display: flex; justify-content: center; }
+  .logo img { width: min(92%, 62vh, 760px); height: auto; animation: bob 4s ease-in-out infinite; filter: drop-shadow(0 0 0 #fff) drop-shadow(3px 4px 0 rgba(255,255,255,.9)) drop-shadow(0 8px 14px rgba(63,55,102,.25)); }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(-1.5deg) } 50% { transform: translateY(-8px) rotate(1.5deg) } }
+
+  .subtitle {
+    font-family: 'Bagel Fat One', cursive; font-size: clamp(16px, min(4vw, 4vh), 32px);
+    color: var(--purple-deep); margin-top: 2px;
+  }
+  .tagline { font-weight: 800; font-size: clamp(13px, 2vh, 17px); max-width: 520px; margin: 6px auto 0; opacity: .8; }
+
+  .prompt {
+    text-align: center; margin: clamp(8px, 2.4vh, 26px) 0 clamp(8px, 2vh, 20px); font-family: 'Bagel Fat One', cursive;
+    font-size: clamp(18px, min(4vw, 3.6vh), 30px); color: var(--ink);
+  }
+  .prompt em { font-style: normal; background: linear-gradient(transparent 55%, var(--yellow) 55%); padding: 0 6px; }
+
+  /* character cards */
+  .grid {
+    flex: 1; min-height: 0; display: grid; gap: clamp(10px, 1.6vw, 20px); padding: 8px clamp(14px, 2.4vw, 26px) 12px;
+    grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+  @media (min-width: 900px) and (min-aspect-ratio: 4/3) { .grid { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); } }
+
+  .card {
+    --c: var(--rachel);
+    appearance: none; cursor: pointer; text-align: center; font: inherit; color: var(--ink);
+    background: #fff; border: 3px solid var(--ink); border-radius: 26px;
+    padding: 8px 8px 10px; position: relative; min-height: 0; min-width: 0;
+    display: flex; flex-direction: column;
+    box-shadow: 5px 6px 0 var(--ink);
+    transition: transform .25s cubic-bezier(.3,1.6,.5,1), box-shadow .25s;
+    transform: rotate(var(--tilt, 0deg));
+  }
+  .card:nth-child(1) { --tilt: -2.5deg } .card:nth-child(2) { --tilt: 1.8deg }
+  .card:nth-child(3) { --tilt: -1.2deg } .card:nth-child(4) { --tilt: 2.4deg } .card:nth-child(5) { --tilt: -2deg } .card:nth-child(6) { --tilt: 1.5deg }
+  .card:hover, .card:focus-visible { transform: translateY(-10px) rotate(0) scale(1.05); box-shadow: 8px 14px 0 var(--ink); outline: none; }
+  .card:active { transform: translateY(-2px) scale(.98); }
+  .card.selected { box-shadow: 0 0 0 5px #fff, 0 0 0 9px var(--purple), 5px 6px 0 9px var(--ink); transform: translateY(-8px) rotate(0) scale(1.05); }
+
+  .avatar {
+    flex: 1 1 0; min-height: 0; width: 100%; border-radius: 18px; border: 3px solid var(--ink);
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,.9) 0, transparent 35%),
+      radial-gradient(circle at 70% 80%, rgba(0,0,0,.12) 0, transparent 50%),
+      var(--c);
+    display: grid; place-items: center; position: relative; overflow: hidden;
+  }
+  .avatar::before { /* glossy sweep */
+    content: ""; position: absolute; left: -20%; right: -20%; top: -30%; height: 55%;
+    background: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,0)); border-radius: 0 0 50% 50%;
+  }
+  .avatar .emoji { font-size: clamp(48px, 7vw, 72px); filter: drop-shadow(3px 4px 0 rgba(36,29,61,.35)); transition: transform .3s; position: relative; }
+  .card:hover .emoji { transform: scale(1.18) rotate(-8deg); }
+  .avatar .photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; z-index: 2; }
+  .avatar:has(.photo) .emoji, .avatar:has(.photo) .mini { display: none; }
+  .avatar .mini { position: absolute; font-size: 20px; opacity: .9 }
+  .avatar .m1 { top: 8px; right: 10px } .avatar .m2 { bottom: 8px; left: 10px }
+
+  .name { font-family: 'Bagel Fat One', cursive; font-size: clamp(16px, min(2.6vw, 3.4vh), 26px); margin-top: 8px; line-height: 1; }
+  .tag {
+    display: inline-block; align-self: center; margin-top: 6px; font-weight: 900; font-size: 12px; letter-spacing: .5px; text-transform: uppercase;
+    background: var(--c); border: 2px solid var(--ink); border-radius: 99px; padding: 3px 10px;
+  }
+  .blurb { font-size: 13px; font-weight: 700; margin-top: 6px; opacity: .75; line-height: 1.25; }
+  /* hide extras when space is tight */
+  @media (max-height: 820px), (max-width: 700px) { .blurb { display: none; } }
+  @media (max-height: 640px) { .tag, .tagline { display: none; } }
+  @media (max-height: 560px) { .kicker { display: none; } }
+
+  .card[data-who=rachel] { --c: var(--rachel) }
+  .card[data-who=ross]   { --c: var(--ross) }
+  .card[data-who=phoebe] { --c: var(--phoebe) }
+  .card[data-who=monica] { --c: var(--monica) }
+  .card[data-who=joey]   { --c: var(--joey) }
+  .card[data-who=chandler] { --c: #ffa24d }
+
+  /* start bar */
+  .startbar { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 20px clamp(10px, 2.4vh, 26px); }
+  .go {
+    font-family: 'Bagel Fat One', cursive; font-size: clamp(18px, 3.4vh, 26px); color: #fff; cursor: pointer;
+    padding: clamp(8px, 1.6vh, 14px) clamp(26px, 4vw, 44px); border-radius: 99px; border: 3px solid var(--ink);
+    background: linear-gradient(#9d94c6, #655A92 50%, #3f3766 51%, #655A92);
+    box-shadow: 0 6px 0 var(--ink), inset 0 4px 6px rgba(255,255,255,.6);
+    text-shadow: 2px 2px 0 var(--ink); transition: transform .12s, box-shadow .12s, filter .2s;
+  }
+  .go:hover:not(:disabled) { transform: translateY(-2px); }
+  .go:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 var(--ink), inset 0 4px 6px rgba(255,255,255,.6); }
+  .go:disabled { filter: grayscale(.9) opacity(.6); cursor: not-allowed; }
+  .hint { font-family: 'VT323', monospace; font-size: clamp(16px, 2.6vh, 22px); color: var(--purple-deep); letter-spacing: 1px; min-height: 1.2em; text-align: center; }
+
+  footer { display: none; }
+  footer .cup { display: inline-block; animation: bob 3s ease-in-out infinite; }
+
+
+  /* ===== quiz ===== */
+  [hidden] { display: none !important; }
+  :root { --right: #737329; --wrong: #aa120f; --cream: #f8e6d8; --tan: #c4a17b; --teal: #245059; --brown: #896861; }
+  .qbody { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: clamp(8px, 1.8vh, 18px); padding: clamp(10px, 2vh, 22px) clamp(14px, 3vw, 34px) clamp(12px, 2.4vh, 24px); overflow-y: auto; }
+  .qtop { display: flex; align-items: center; gap: 12px; }
+  .back { font-family: 'VT323', monospace; font-size: 20px; cursor: pointer; background: var(--cream); color: var(--ink); border: 2px solid var(--ink); border-radius: 99px; padding: 2px 14px; box-shadow: 2px 3px 0 var(--ink); }
+  .back:hover { background: var(--yellow); }
+  .progress { flex: 1; height: 16px; border: 3px solid var(--ink); border-radius: 99px; background: #fff; overflow: hidden; }
+  .progress i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(45deg, var(--yellow) 0 10px, #ffe27a 10px 20px); transition: width .4s; border-right: 3px solid var(--ink); }
+  .score { font-family: 'VT323', monospace; font-size: 22px; color: var(--purple-deep); white-space: nowrap; }
+  .qhead { display: flex; align-items: center; gap: clamp(10px, 2vw, 20px); }
+  .qavatar { width: clamp(56px, 11vh, 96px); aspect-ratio: 1; flex: none; border-radius: 50%; border: 3px solid var(--ink); box-shadow: 3px 4px 0 var(--ink); background: var(--cream) center top / cover; }
+  .qtext { font-family: 'Bagel Fat One', cursive; line-height: 1.15; font-size: clamp(20px, min(4.6vw, 4.2vh), 34px); }
+  .qnum { font-family: 'VT323', monospace; font-size: 20px; letter-spacing: 2px; color: var(--brown); }
+  .answers { flex: 1; min-height: 0; display: grid; gap: clamp(8px, 1.6vh, 16px); grid-template-columns: 1fr; align-content: center; }
+  @media (min-width: 760px) { .answers { grid-template-columns: 1fr 1fr; } }
+  .ans {
+    display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; font: inherit; font-weight: 900;
+    font-size: clamp(15px, min(2.6vw, 2.8vh), 21px); color: var(--ink);
+    background: linear-gradient(#fff, var(--cream)); border: 3px solid var(--ink); border-radius: 18px;
+    padding: clamp(8px, 1.8vh, 16px) 14px; box-shadow: 4px 5px 0 var(--ink);
+    transition: transform .15s, box-shadow .15s, background .2s;
+  }
+  .ans .l { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: 'Bagel Fat One', cursive; background: var(--purple); color: #fff; border: 2px solid var(--ink); }
+  .ans:hover:not(:disabled) { transform: translate(-2px, -3px); box-shadow: 6px 8px 0 var(--ink); background: linear-gradient(#fff, #f3e1b4); }
+  .ans:active:not(:disabled) { transform: translate(2px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+  .ans:disabled { cursor: default; }
+  .ans.right { background: var(--right); color: #fff; }
+  .ans.right .l { background: #fff; color: var(--right); }
+  .ans.wrong { background: var(--wrong); color: #fff; }
+  .ans.wrong .l { background: #fff; color: var(--wrong); }
+  .ans.dim { opacity: .5; }
+  .qfoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; }
+  .fb { font-family: 'VT323', monospace; font-size: clamp(18px, 2.8vh, 24px); color: var(--purple-deep); }
+  .next { visibility: hidden; }
+  .next.show { visibility: visible; }
+
+  /* results */
+  .results { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 2vh, 18px); text-align: center; padding: 16px; overflow-y: auto; }
+  .bigscore { font-family: 'Bagel Fat One', cursive; font-size: clamp(56px, 16vh, 120px); line-height: 1; color: var(--yellow); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; text-shadow: 5px 6px 0 var(--ink); }
+  .verdict { font-family: 'Bagel Fat One', cursive; font-size: clamp(22px, 4.6vh, 36px); }
+  .vsub { font-weight: 800; opacity: .8; max-width: 460px; }
+  .rbtns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+  .go.alt { background: linear-gradient(#f8e6d8, #c4a17b 50%, #896861 51%, #c4a17b); color: var(--ink); text-shadow: none; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="marquee" aria-hidden="true">
+  <span>
+    ✦ HOW YOU DOIN'? ✦ WE WERE ON A BREAK! ✦ PIVOT! ✦ SMELLY CAT ✦ JOEY DOESN'T SHARE FOOD ✦ I KNOW! ✦ SEVEN! ✦ OH. MY. GOD. ✦ COULD I BE ANY MORE READY? ✦
+    ✦ HOW YOU DOIN'? ✦ WE WERE ON A BREAK! ✦ PIVOT! ✦ SMELLY CAT ✦ JOEY DOESN'T SHARE FOOD ✦ I KNOW! ✦ SEVEN! ✦ OH. MY. GOD. ✦ COULD I BE ANY MORE READY? ✦
+  </span>
+</div>
+
+<main>
+  <div class="window" id="home">
+    <div class="titlebar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <span>centralperk_quiz.exe</span>
+      <b>♡ v1.0</b>
+    </div>
+
+    <section class="hero">
+      <span class="kicker">★ THE ULTIMATE QUIZ ★</span>
+      <h1 class="logo"><img src="images/friends-logo.png" alt="FRIENDS"></h1>
+      <div class="subtitle">How well do you really know them?</div>
+      <p class="tagline">10 questions. 6 friends. Zero excuses. Pick your favorite and prove you're their lobster. 🦞</p>
+    </section>
+
+    <h2 class="prompt">Who do you think you <em>know best</em>? 💜</h2>
+
+    <div class="grid" id="grid">
+      <button class="card" data-who="rachel" aria-pressed="false">
+        <div class="avatar"><span class="mini m1">✨</span><img class="photo" src="images/rachel.jpg" alt="Rachel" onerror="this.remove()"><span class="emoji">👠</span><span class="mini m2">☕</span></div>
+        <div class="name">Rachel</div>
+        <span class="tag">Green</span>
+        <p class="blurb">Fashion girl. Waitress turned Ralph Lauren exec.</p>
+      </button>
+      <button class="card" data-who="ross" aria-pressed="false">
+        <div class="avatar"><span class="mini m1">🦴</span><img class="photo" src="images/ross.jpg" alt="Ross" onerror="this.remove()"><span class="emoji">🦖</span><span class="mini m2">🎹</span></div>
+        <div class="name">Ross</div>
+        <span class="tag">Geller</span>
+        <p class="blurb">Paleontologist. Three-time divorcé. PIVOT!</p>
+      </button>
+      <button class="card" data-who="phoebe" aria-pressed="false">
+        <div class="avatar"><span class="mini m1">🐱</span><img class="photo" src="images/phoebe.jpg" alt="Phoebe" onerror="this.remove()"><span class="emoji">🎸</span><span class="mini m2">🌼</span></div>
+        <div class="name">Phoebe</div>
+        <span class="tag">Buffay</span>
+        <p class="blurb">Smelly Cat's number one fan. Total free spirit.</p>
+      </button>
+      <button class="card" data-who="monica" aria-pressed="false">
+        <div class="avatar"><span class="mini m1">🧽</span><img class="photo" src="images/monica.jpg" alt="Monica" onerror="this.remove()"><span class="emoji">👩‍🍳</span><span class="mini m2">🍽️</span></div>
+        <div class="name">Monica</div>
+        <span class="tag">Geller</span>
+        <p class="blurb">Chef. Clean freak. Competitive at everything.</p>
+      </button>
+      <button class="card" data-who="chandler" aria-pressed="false">
+        <div class="avatar"><span class="mini m1">🦆</span><img class="photo" src="images/chandler.png" alt="Chandler" onerror="this.remove()"><span class="emoji">😏</span><span class="mini m2">💼</span></div>
+        <div class="name">Chandler</div>
+        <span class="tag">Bing</span>
+        <p class="blurb">Sarcasm champion. Could he BE any funnier?</p>
+      </button>
+      <button class="card" data-who="joey" aria-pressed="false">
+        <div class="avatar"><span class="mini m1">🎬</span><img class="photo" src="images/joey.jpg" alt="Joey" onerror="this.remove()"><span class="emoji">🍕</span><span class="mini m2">🐣</span></div>
+        <div class="name">Joey</div>
+        <span class="tag">Tribbiani</span>
+        <p class="blurb">Actor. Pizza enthusiast. How you doin'?</p>
+      </button>
+    </div>
+
+    <div class="startbar">
+      <button class="go" id="go" disabled>Start Quiz ▶</button>
+      <div class="hint" id="hint">&gt; select a friend to begin_</div>
+    </div>
+  </div>
+
+  <footer><span class="cup">☕</span> made with love at Central Perk <span class="cup">☕</span></footer>
+  <div class="window" id="quiz" hidden>
+    <div class="titlebar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <span id="qtitle">quiz.exe</span>
+      <b id="qcount">Q 1/10</b>
+    </div>
+    <div class="qbody" id="qbody">
+      <div class="qtop">
+        <button class="back" id="back">◀ Home</button>
+        <div class="progress"><i id="bar"></i></div>
+        <div class="score" id="score">★ 0</div>
+      </div>
+      <div class="qhead">
+        <div class="qavatar" id="qavatar"></div>
+        <div><div class="qnum" id="qnum"></div><div class="qtext" id="qtext"></div></div>
+      </div>
+      <div class="answers" id="answers"></div>
+      <div class="qfoot">
+        <div class="fb" id="fb"></div>
+        <button class="go next" id="next">Next ▶</button>
+      </div>
+    </div>
+    <div class="results" id="results" hidden>
+      <div class="qavatar" id="ravatar"></div>
+      <div class="bigscore" id="rscore">0/10</div>
+      <div class="verdict" id="verdict"></div>
+      <p class="vsub" id="vsub"></p>
+      <div class="rbtns">
+        <button class="go" id="again">Play again ↻</button>
+        <button class="go alt" id="home2">Pick a friend</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // sparkles
+  const glyphs = ['✦','✧','★','✶'];
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = glyphs[i % glyphs.length];
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.top = (8 + Math.random() * 90) + 'vh';
+    s.style.fontSize = (12 + Math.random() * 22) + 'px';
+    s.style.animationDelay = (Math.random() * 3) + 's';
+    s.style.animationDuration = (2 + Math.random() * 3) + 's';
+    document.body.appendChild(s);
+  }
+
+  // character selection
+  const names = { rachel: 'Rachel', ross: 'Ross', phoebe: 'Phoebe', monica: 'Monica', chandler: 'Chandler', joey: 'Joey' };
+  const cards = [...document.querySelectorAll('.card')];
+  const go = document.getElementById('go');
+  const hint = document.getElementById('hint');
+  let selected = null;
+
+  cards.forEach(card => card.addEventListener('click', () => {
+    selected = card.dataset.who;
+    cards.forEach(c => {
+      const on = c === card;
+      c.classList.toggle('selected', on);
+      c.setAttribute('aria-pressed', on);
+    });
+    go.disabled = false;
+    go.textContent = `Start ${names[selected]}'s Quiz ▶`;
+    hint.textContent = `> ${names[selected].toLowerCase()} selected. ready when you are_`;
+  }));
+
+  // ===== quiz data (first option in each list is the correct answer; options are shuffled when shown) =====
+  const QUIZZES = {
+    rachel: [
+      { q: "What is Rachel's last name?", a: ["Green", "Buffay", "Geller", "Bing"] },
+      { q: "Which Central Perk employee has a crush on Rachel?", a: ["Gunther", "Ross", "Chandler", "Tag"] },
+      { q: "What did Rachel name her baby?", a: ["Emma", "Emmit", "Emily", "Emalia"] },
+      { q: "What part of the body, when touched, freaks Rachel out?", a: ["Eyes", "Armpits", "Fingernails", "Scalp"] },
+      { q: "When 'Friends' began, Rachel ran away from her own wedding. Who was she supposed to marry?", a: ["Barry", "Ross", "Richard", "Chandler"] },
+      { q: "What actress plays Rachel?", a: ["Jennifer Aniston", "Jennifer Anistun", "Jennifer Anistin", "Jennifer Anistan"] },
+      { q: "Which of the following actresses guest starred as Rachel's younger sister?", a: ["Reese Witherspoon", "Katie Holmes", "Selma Blair", "Rachel Leigh Cook"] },
+      { q: "Who of the following has Rachel married?", a: ["Ross", "Joey", "Chandler", "Barry"] },
+      { q: "Why didn't Rachel want to go running with Phoebe?", a: ["Phoebe runs weird", "Phoebe hiccups while she runs", "Rachel runs weird", "Rachel hiccups while she runs"] },
+      { q: "What is Rachel's favorite book?", a: ["Little Women", "Pride and Prejudice", "Jane Eyre", "Wuthering Heights"] }
+    ],
+    ross: [
+      { q: "What was the 'total state of awareness' Ross tried to teach Phoebe and Rachel?", a: ["Unagi", "Salmon skin roll", "Sashimi", "Chirashi"] },
+      { q: "What did Ross want Joey to bet twenty dollars on in Las Vegas for him?", a: ["Black 15", "Black 13", "Black 14", "Black 16"] },
+      { q: "Ross had a joke published in what magazine?", a: ["Playboy", "Penthouse", "Hustler", "Playgirl"] },
+      { q: "What kind of accent did Ross use when he guest-lectured at NYU?", a: ["British", "German", "French", "Irish"] },
+      { q: "How did Ross first find out about Rachel's feelings for him?", a: ["She told him in a drunken message", "Chandler told him on his birthday", "She never had feelings for Ross", "She told him at the airport"] },
+      { q: "Why was it considered inappropriate for Ross to make a move on Cassie?", a: ["She was his cousin", "She was 16", "She was Joey's sister", "She was his aunt"] },
+      { q: "What nickname did Ross use for Paolo?", a: ["Rigatoni", "Spaghetti", "Lasagna", "Calzone"] },
+      { q: "According to Ross, his favorite pink shirt is not pink. It's what color?", a: ["Salmon", "Mauve", "Coral", "Red"] },
+      { q: "Which one of these instruments have we seen Ross try to play?", a: ["Bagpipes", "Piano", "Cello", "Guitar"] },
+      { q: "At Ross's bachelor party, the wedding ring turns up missing. What happened to it?", a: ["The duck swallowed it", "The stripper stole it", "Ross lost it himself", "Chandler lost it"] }
+    ],
+    joey: [
+      { q: "What is Joey's full name?", a: ["Joseph Francis Tribbiani", "Joseph Robert Tribbiani", "Joseph Steven Tribbiani", "Joseph Frederick Tribbiani"] },
+      { q: "How many sisters does Joey have?", a: ["7", "0", "15", "1"] },
+      { q: "Which of these is NOT the name of one of Joey's sisters?", a: ["Susie Ann", "Dina", "Mary Angela", "Cookie"] },
+      { q: "In 'The One With The Ride-Along' Joey leaped to save his sandwich when he thought he heard a gun shot.", a: ["True", "False"], ans: "True" },
+      { q: "What was the name of Joey's girlfriend who Chandler was in love with?", a: ["Kathy", "Casey", "Kate", "Lauren"] },
+      { q: "In season eight, who did Joey fall in love with?", a: ["Rachel", "Phoebe", "Monica", "Ross"] },
+      { q: "Who did Joey live with up until season six?", a: ["Chandler", "Rachel", "Ross", "Phoebe"] },
+      { q: "What is the name of Joey's bedtime penguin pal?", a: ["Hugsy", "Palsy", "Mugsy", "Jugsy"] },
+      { q: "Joey once went on a date with Ursula Buffay, Phoebe's sister.", a: ["True", "False"], ans: "True" },
+      { q: "Which book did Joey agree to read if Rachel read 'The Shining'?", a: ["Little Women", "Emma", "Pride And Prejudice", "Great Expectations"] }
+    ],
+    monica: [
+      { q: "What letter does Monica's middle name start with?", a: ["E", "C", "S", "L"] },
+      { q: "Which of these was NOT one of Monica's boyfriends?", a: ["Joshua", "Richard", "Pete", "Fun Bobby"] },
+      { q: "What was Monica's dog's name when she was a child?", a: ["Chi-Chi", "Simon", "La Pooh", "Fluffy"] },
+      { q: "What famous person did Monica once go out with?", a: ["Jean-Claude Van Damme", "Arnold Schwarzenegger", "Steven Seagal", "Antonio Banderas"] },
+      { q: "What kind of famous person once gave Monica a hickey?", a: ["A Blowfish", "A Backstreet Boy", "An Insane Clown Posse", "A Rolling Stone"] },
+      { q: "What is Monica's parents' nickname for her?", a: ["Harmonica", "Monie", "Mon-Mon", "Moni-Bear"] },
+      { q: "Which of Monica's boyfriends was only 17?", a: ["Ethan", "Jason", "Justin", "Alex"] },
+      { q: "Monica and Rachel were once related. How?", a: ["Sisters-in-law", "Cousins", "Step-sisters", "Just friends, they weren't related"] },
+      { q: "What did Monica's boyfriend Pete have in his restaurant that she liked the most?", a: ["Spider burners", "Huge refrigerator", "Potato peeler", "Stove"] },
+      { q: "What color was Monica's bridesmaid's dress in Ross' wedding to Emily?", a: ["Red", "White", "Light blue", "Pink"] }
+    ],
+    chandler: [
+      { q: "What was Chandler's dad's all-male burlesque show?", a: ["Viva Las Gaygus", "Gay Guys", "Viva Las Vegas", "Gay Gamblers"] },
+      { q: "What did Chandler name the chick?", a: ["Yasmine", "Carmen", "Pamela", "Jasmine"] },
+      { q: "What was the name of Chandler's first roommate?", a: ["Kip", "Mitch", "Joey", "Eddie"] },
+      { q: "What is Chandler's mom's first name?", a: ["Nora", "Norma", "Nancy", "Nina"] },
+      { q: "What game did Joey and Chandler create together?", a: ["Fireball", "Hardball", "Ultimate Fireball", "Ultimate Hardball"] },
+      { q: "What game did Chandler play in the 8th season that made his hand cramp up?", a: ["Ms. Pac-Man", "Pac-Man", "Speedball", "Fireball"] },
+      { q: "Who was the second one to find out that Chandler and Monica were dating?", a: ["Rachel", "Phoebe", "Ross", "Joey"] },
+      { q: "What was the name of the girl both Chandler and Joey dated?", a: ["Kathy", "Carmen", "Kasey", "Monica"] },
+      { q: "Finish this Chandler quote: 'Get out of my chair, ____'.", a: ["Dillhole", "Dingus", "Dillweed", "Jackass"] },
+      { q: "Who was Chandler trapped in an ATM vestibule with?", a: ["Jill Goodacre", "Elle Macpherson", "Cindy Crawford", "Claudia Schiffer"] }
+    ],
+    phoebe: [
+      { q: "What was the name of Phoebe's first husband?", a: ["Duncan", "David", "Daniel", "Steven"] },
+      { q: "What is the name of the woman in Phoebe's painting, which Mike told her to get rid of?", a: ["Gladys", "Monica", "Gloria", "Gaynor"] },
+      { q: "Are the names of the triplets Phoebe gave birth to Frank Jr Jr, Lesley and Chandler?", a: ["Yes", "No"], ans: "Yes" },
+      { q: "What does Phoebe say Monica uses too much of in her restaurant?", a: ["Garlic", "Chives", "Cheese", "Wine"] },
+      { q: "What are the two men Phoebe has to choose between named?", a: ["Vince and Jason", "Jack and Will", "Lance and Mike", "Victor and Russ"] },
+      { q: "Did Mike try to propose to Phoebe?", a: ["Yes", "No"], ans: "Yes" },
+      { q: "What was the name of Phoebe's boyfriend who went away to Minsk?", a: ["David", "Mike", "James", "Ben"] },
+      { q: "Who did Phoebe kiss on her 31st birthday?", a: ["Joey", "Ross", "Rachel", "Mike"] },
+      { q: "Which animal did Phoebe believe her mother was reincarnated as?", a: ["Cat", "Duck", "Dog", "Squirrel"] },
+      { q: "How did Phoebe meet Mike?", a: ["Blind date", "In railway station", "In Central Perk", "Ex-boyfriend of Ursula"] }
+    ]
+  };
+
+  const $ = id => document.getElementById(id);
+  const homeEl = $('home'), quizEl = $('quiz');
+  const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  let who = null, qs = [], idx = 0, score = 0, locked = false;
+
+  function photoOf(w) {
+    const img = document.querySelector(`.card[data-who=${w}] .photo`);
+    return img ? `url("${img.getAttribute('src')}")` : 'none';
+  }
+
+  function startQuiz(w) {
+    who = w; idx = 0; score = 0;
+    // correct answer = o.ans if given, else the first option; 2-option questions (True/False, Yes/No) keep their order
+    qs = QUIZZES[w].map(o => ({ q: o.q, correct: o.ans ?? o.a[0], opts: o.a.length > 2 ? shuffle(o.a) : o.a }));
+    $('qtitle').textContent = `${w}_quiz.exe`;
+    $('qavatar').style.backgroundImage = photoOf(w);
+    $('ravatar').style.backgroundImage = photoOf(w);
+    $('results').hidden = true; $('qbody').hidden = false;
+    homeEl.hidden = true; quizEl.hidden = false;
+    showQ();
+  }
+
+  function showQ() {
+    const cur = qs[idx]; locked = false;
+    $('qcount').textContent = `Q ${idx + 1}/${qs.length}`;
+    $('qnum').textContent = `QUESTION ${idx + 1}`;
+    $('qtext').textContent = cur.q;
+    $('bar').style.width = (idx / qs.length * 100) + '%';
+    $('score').textContent = `★ ${score}`;
+    $('fb').textContent = '';
+    $('next').classList.remove('show');
+    $('next').textContent = idx === qs.length - 1 ? 'See results ▶' : 'Next ▶';
+    const box = $('answers'); box.innerHTML = '';
+    cur.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'ans';
+      b.innerHTML = `<span class="l">${'ABCD'[i]}</span><span></span>`;
+      b.lastChild.textContent = opt;
+      b.addEventListener('click', () => pick(b, opt));
+      box.appendChild(b);
+    });
+  }
+
+  function pick(btn, opt) {
+    if (locked) return; locked = true;
+    const cur = qs[idx], ok = opt === cur.correct;
+    if (ok) score++;
+    [...$('answers').children].forEach(b => {
+      b.disabled = true;
+      const t = b.lastChild.textContent;
+      if (t === cur.correct) b.classList.add('right');
+      else if (b === btn) b.classList.add('wrong');
+      else b.classList.add('dim');
+    });
+    $('score').textContent = `★ ${score}`;
+    $('fb').textContent = ok ? '> Correct! Could you BE any smarter?' : `> Oh no! It was "${cur.correct}"`;
+    $('bar').style.width = ((idx + 1) / qs.length * 100) + '%';
+    $('next').classList.add('show');
+  }
+
+  function showResults() {
+    const n = qs.length;
+    $('qbody').hidden = true; $('results').hidden = false;
+    $('qcount').textContent = 'DONE ✓';
+    $('rscore').textContent = `${score}/${n}`;
+    const r = score / n;
+    const [v, s] =
+      r === 1 ? ["You're their lobster! 🦞", `A perfect score. ${names[who]} would be so proud.`] :
+      r >= .8 ? ["Pretty good friend!", `You know ${names[who]} really well. Just a couple of slips.`] :
+      r >= .5 ? ["Not bad, not bad", "You know the basics. Time for a rewatch?"] :
+                ["Oh. My. God.", "We were on a break… from paying attention. Try again!"];
+    $('verdict').textContent = v; $('vsub').textContent = s;
+  }
+
+  $('next').addEventListener('click', () => { if (idx < qs.length - 1) { idx++; showQ(); } else showResults(); });
+  $('again').addEventListener('click', () => startQuiz(who));
+  const goHome = () => { quizEl.hidden = true; homeEl.hidden = false; };
+  $('back').addEventListener('click', goHome);
+  $('home2').addEventListener('click', goHome);
+
+  go.addEventListener('click', () => {
+    if (!selected) return;
+    if (QUIZZES[selected]) startQuiz(selected);
+    else hint.textContent = `> ${names[selected]}'s quiz is coming soon!`;
+  });
+</script>
+</body>
+</html>
