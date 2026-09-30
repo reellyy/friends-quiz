@@ -102,22 +102,23 @@
   }
   .prompt em { font-style: normal; background: linear-gradient(transparent 55%, var(--yellow) 55%); padding: 0 0.375rem; }
 
-  /* character cards */
   .grid {
-    /* cards have a fixed size in rem (--cw wide, --ar shape), so each photo keeps the exact same crop at every screen size; the whole grid only scales with the root font size */
-    --cw: 12.5rem; --ar: 4 / 5;
-    flex: 1; min-height: 0; display: grid; gap: 1rem; padding: 0.5rem 1rem 0.75rem;
-    grid-template-columns: repeat(3, var(--cw)); justify-content: center; align-content: center;
+
+    /* The grid measures its own height (container query), and each card is sized so all rows of cards + their text always fit in it. Cards keep a fixed photo shape (--ar), so the crop never changes, the cards just scale. */
+    container-type: size; --rows: 2; --cols: 3; --k: 1.25; --ar: 4 / 5; --max: 12.5rem; --txt: 5.75rem; --gap: 1rem;
+    flex: 1; min-height: 0; display: grid; gap: var(--gap); padding: 0.5rem 1rem 0.75rem;
+    grid-template-columns: repeat(3, max-content); justify-content: center; align-content: center;
   }
-  @media (min-width: 62.5rem) and (min-aspect-ratio: 4/3) { .grid { --cw: 9.5rem; grid-template-columns: repeat(6, var(--cw)); } }
-  @media (max-width: 35rem) { .grid { --cw: 8rem; --ar: 1 / 1.05; gap: 0.75rem; grid-template-columns: repeat(2, var(--cw)); } }
-  @media (max-width: 35rem) and (max-height: 45rem) { .grid { --cw: 6.75rem; } .subtitle { display: none; } }
+  @media (min-width: 62.5rem) and (min-aspect-ratio: 4/3) { .grid { --rows: 1; --cols: 6; --max: 9.5rem; grid-template-columns: repeat(6, max-content); } }
+  @media (max-width: 35rem) { .grid { --gap: 0.625rem; padding-inline: 0.75rem; } }
+  @media (max-width: 35rem) and (max-height: 45rem) { .subtitle { display: none; } }
 
   .card {
     --c: var(--rachel);
+    width: min(clamp(4rem, calc((100cqh - 1.25rem - var(--rows) * var(--txt) - (var(--rows) - 1) * var(--gap)) / (var(--rows) * var(--k))), var(--max)), calc((100cqw - 1.5rem - (var(--cols) - 1) * var(--gap)) / var(--cols)));
     appearance: none; cursor: pointer; text-align: center; font: inherit; color: var(--ink);
     background: #fff; border: 0.1875rem solid var(--ink); border-radius: 1.625rem;
-    padding: 0.5rem 0.5rem 0.625rem; position: relative; min-height: 0; min-width: 0;
+    padding: 0.5rem 0.5rem 0.625rem; position: relative; min-width: 0;
     display: flex; flex-direction: column;
     box-shadow: 0.3125rem 0.375rem 0 var(--ink);
     transition: transform .25s cubic-bezier(.3,1.6,.5,1), box-shadow .25s;
@@ -155,7 +156,9 @@
   }
   .blurb { font-size: 0.8125rem; font-weight: 700; margin-top: 0.375rem; opacity: .75; line-height: 1.25; }
   /* hide extras when space is tight */
-  @media (max-height: 51.25rem), (max-width: 43.75rem) { .blurb { display: none; } }
+  .blurb { display: none; } /* no room for it once cards must fit the screen */
+  @media (max-height: 40rem), (max-width: 35rem) { .grid { --txt: 3.75rem; } }
+  @media (min-aspect-ratio: 3/2) { .tagline, .kicker { display: none; } }
   @media (max-height: 40rem) { .tag, .tagline { display: none; } }
   @media (max-width: 35rem) { .tag, .tagline, .kicker { display: none; } .hero { padding-top: 0.5rem; } .prompt { margin: 0.5rem 0; } .card { padding: 0.375rem 0.375rem 0.5rem; } .name { margin-top: 0.375rem; } }
   @media (max-height: 35rem) { .kicker { display: none; } }
